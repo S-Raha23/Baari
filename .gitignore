@@ -1,0 +1,34 @@
+# Environment and secrets
+.venv/
+.env
+*.env.local
+
+# Audio and data (never commit audio or personal data)
+data/raw/
+data/cache/
+data/processed/
+*.wav
+*.pcm
+*.mp3
+*.ogg
+*.flac
+
+# Model binaries (card.md is committed)
+models/*
+!models/card.md
+*.onnx
+*.gguf
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

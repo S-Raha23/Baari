@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "baari"
+version = "0.1.0"
+description = "Baari (बारी): a turn-taking engine for Indian-language voice agents. Knows when it's your turn."
+requires-python = ">=3.11,<3.12"
+readme = "README.md"
+dependencies = [
+  "numpy==2.4.6",
+  "scipy==1.17.1",
+  "librosa==0.11.0",
+  "soundfile==0.14.0",
+  "sounddevice==0.5.6",
+  "websockets==17.3",
+  "httpx==0.28.1",
+  "onnxruntime==1.31.1",
+  "lightgbm==4.7.0",
+  "scikit-learn==1.9.1",
+  "fastapi==0.162.0",
+  "uvicorn==0.54.0",
+  "matplotlib==3.11.2",
+  "pydantic==2.14.2",
+  "pyyaml==6.0.3",
+  "python-dotenv==1.2.4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==9.2.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+baari = ["**/*.yaml", "app/static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
