@@ -24,15 +24,35 @@ audio in M1; the energy VAD stays as a dependency-free fallback and for tests.
   our commits, and sends `commit` C ms after each local pause onset (C = 120 ms by default).
 - Fallback mode connects with `x-min-silence-ms=200` and sends no commits.
 - Each transcript is paired with the latest local pause onset at or before the `processing`
-  message that preceded it.
+  message that preceded it, or with the transcript itself when (as observed) no `processing`
+  message is sent.
 
 ## D4 — API calls are strictly sequential (30 Oct 2026)
 
 The error docs show accounts that allow only one active request at a time (429). All batch
 work (TTS cache warm-up, `transcribe-cache`) runs one call at a time.
 
-## D5 — Commit vs fallback mode: PENDING M0 measurement
+## D5 — Commit mode is the default word-lane mode (30 Oct 2026)
 
 Rule fixed before measuring: choose **commit mode** if every local segment gets exactly one
 transcript and its median text arrival after pause onset is lower than fallback mode's;
-otherwise use **fallback mode**. The result goes here, citing `reports/spikes/stt_spike.md`.
+otherwise use **fallback mode**.
+
+Result (`reports/spikes/stt_spike.md`, 2 runs per mode, synthetic clip with 4 local pauses):
+commit mode returned 4 transcripts per run (one per local segment) with median text arrival
+540 ms after pause onset (C = 120 ms included); fallback mode (`x-min-silence-ms=200`)
+returned 3 per run (merged "matlab" with the next phrase), median 753 ms. → **Commit mode.**
+Caveat: synthetic TTS speech; re-measured on real recordings in M3 (word-lane timing, SPEC §8.5).
+
+## D6 — Prisma language `hi-IN` + `codemix` (30 Oct 2026)
+
+SPEC §6.3 asked for `language_code=hi-IN,en-IN`; the server rejects language lists (see
+API_NOTES). `hi-IN` with `format=codemix` keeps English words in Latin script, which is what
+the lexical features need for Hinglish. `indic-auto` is the alternative if regional-language
+speakers are recorded.
+
+## D7 — Timbre defaults: `timbre-v2.5`, voice `Poorvi`, language `hi-en`, 16 kHz raw PCM (30 Oct 2026)
+
+Poorvi is the only voice documented as Hinglish. 16 kHz matches the capture pipeline, so the
+bot's audio needs no resampling. The live agent uses the WebSocket transport (first audio
+≈ 0.8–1.0 s vs 1.2–3.6 s for REST, `reports/spikes/tts_spike.md`).

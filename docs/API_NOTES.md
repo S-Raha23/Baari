@@ -72,9 +72,28 @@ Matches SPEC.md §3.1. Additional details:
   templates must spell out fake mobile numbers digit by digit.
 - Baari's client strips a WAV header if one arrives despite `container=raw` (defensive).
 
-## To verify in the spikes (needs the API key)
+## Verified by running against the real API (30 Oct 2026)
 
-- [ ] `prisma-v3.0` is available on the programme credits (else fall back to v2.5 + `hi-IN`).
-- [ ] `commit` closes a segment and how fast the transcript arrives (vs fallback mode).
-- [ ] Whether `codemix` output for Hinglish looks right.
-- [ ] Timbre first-audio latency, REST vs WebSocket; whether `container=raw` returns bare PCM.
+Numbers: `reports/spikes/stt_spike.md`, `reports/spikes/tts_spike.md`. Behaviour:
+
+- **Prisma v3.0 is available on the programme credits.** Proof: `format=codemix` is accepted
+  with `model=prisma-v3.0` but the connection is closed (1008) with `model=prisma-v2.5`.
+- **Language lists are rejected** despite the docs: `language_code: hi-IN,en-IN` (and the old
+  `lang_code`) → `error` "Invalid language_code: exactly one locale is required (e.g. hi-IN)…
+  Use multi_lang_codes…", then close 1008. Single `hi-IN` and `indic-auto` work. Baari uses
+  `hi-IN` + `codemix` (English words stay in Latin script: "मेरा loan का EMI").
+- **`commit` works**: each commit closes the open utterance and a `transcript` follows
+  (~0.3–0.6 s after the commit on the synthetic clip). One transcript per local segment.
+- **No `processing` message was ever received** (documented, but not sent by the server we hit).
+  Do not depend on it.
+- **`speech_start` carries `utterance_id`**, which matches the `utterance_id` of the following
+  `transcript`; it arrives ~0.4 s after the actual speech onset.
+- The `connected` config contains undocumented keys `partials_enabled: false`,
+  `partial_interval_ms: 450`, `partial_max_window_s: 15.0`. Partial transcripts may exist
+  server-side but are not documented or enabled; Baari assumes **no partials** (SPEC §3.1).
+- In fallback mode (`x-min-silence-ms=200`) Prisma did not split "matlab | pichle mahine ka"
+  (a ~150 ms TTS gap) and transcripts came later than in commit mode.
+- Timbre `container=raw` returns bare PCM (no RIFF header). WebSocket streamed 89–108 chunks
+  per sentence. Synthesis is not deterministic: the same text gave 4.6–5.8 s of audio.
+- Timbre WebSocket first audio ≈ 0.8–1.0 s; REST first byte ≈ 1.2–3.6 s (REST sends the
+  whole file at once). The live agent must use WebSocket + speculative preparation.

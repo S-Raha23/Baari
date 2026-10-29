@@ -39,7 +39,7 @@ class PrismaConfig:
 
     url: str = "wss://api.vachana.ai/stt/v3/stream"
     model: str = "prisma-v3.0"
-    language_code: str = "hi-IN,en-IN"
+    language_code: str = "hi-IN"  # lists like "hi-IN,en-IN" are rejected (docs/API_NOTES.md)
     format: str = "codemix"
     sample_rate: int = SAMPLE_RATE
     vad_threshold: float = 0.7
