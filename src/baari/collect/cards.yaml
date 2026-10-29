@@ -1,0 +1,137 @@
+# Prompt cards for recording sessions (docs/DATA_PROTOCOL.md).
+#
+# `bot` is spoken by Timbre (Hinglish, Latin script, numbers as words).
+# `card` is what the participant reads: the situation, not the words to say.
+# `slot` is the dialogue context the bot is in (used as a context feature later):
+#   free_text | number | yes_no | choice ; `expected_digits` for number slots.
+# Placeholders in cards are filled with generated FAKE values:
+#   {mobile}   10 digits starting with 5 (no Indian mobile number starts with 5)
+#   {last4} {code6}  random digits      {amount}  rupee amount      {date}  day + month
+
+turns:
+  complaint:
+    slot: free_text
+    bot:
+      - "Namaste, main Baari Bank se baat kar rahi hoon. Bataiye, aapki kya samasya hai?"
+      - "Ji, boliye. Main aapki kya madad kar sakti hoon?"
+    cards:
+      - "Last month your EMI was deducted twice. Explain the problem."
+      - "You withdrew cash at an ATM, the money was debited but no cash came out. Explain."
+      - "A UPI payment to a shop failed, but the money was cut from your account. Explain."
+      - "There is a charge on your statement that you don't recognise. Describe it."
+      - "Your home loan statement has not arrived for two months. Complain about it."
+
+  explanation:
+    slot: free_text
+    bot:
+      - "Theek hai. Thoda detail mein bataiye, kya hua tha?"
+      - "Achha. Aap mujhe poori baat bataiye, shuru se."
+    cards:
+      - "Your card was declined at a petrol pump yesterday. Describe what happened."
+      - "OTPs are not reaching your phone when you try to pay online. Describe what you tried."
+      - "Your net banking got locked after you entered the wrong password. Explain how."
+      - "A cheque you gave your landlord bounced, but you had enough balance. Explain."
+
+  number_mobile:
+    slot: number
+    expected_digits: 10
+    bot:
+      - "Kripya apna registered mobile number bataiye."
+      - "Aapka mobile number kya hai, jo account se juda hai?"
+    cards:
+      - "Tell the bot this mobile number: {mobile}  (say it the way you normally would, in groups)"
+
+  number_last4:
+    slot: number
+    expected_digits: 4
+    bot:
+      - "Apne account number ke aakhri chaar ank bataiye."
+    cards:
+      - "Tell the bot the last four digits of your account: {last4}"
+
+  number_code:
+    slot: number
+    expected_digits: 6
+    bot:
+      - "Aapke phone par chhe ank ka code aaya hoga. Woh code bataiye."
+    cards:
+      - "Read out this code: {code6}"
+
+  date_amount:
+    slot: free_text
+    bot:
+      - "Kitne paise extra kate the, aur kis tareekh ko?"
+      - "Transaction kab hua tha, aur kitne ka tha?"
+    cards:
+      - "The extra deduction was Rs {amount} on {date}. Tell the bot."
+      - "You paid Rs {amount} on {date}. Tell the bot, but you are not sure about the date."
+
+  yes_no:
+    slot: yes_no
+    bot:
+      - "Kya aap apna card block karna chahte hain?"
+      - "Kya main aapki complaint register kar doon?"
+      - "Kya aap SMS par updates lena chahenge?"
+    cards:
+      - "Answer yes, clearly."
+      - "Yes, but you're a little unsure."
+      - "Say no, and explain why in a few words."
+      - "Answer yes, then add one more thing you want."
+
+  choice:
+    slot: choice
+    bot:
+      - "Aap refund account mein chahenge, ya agli EMI mein adjust karwana chahenge?"
+      - "Callback aaj shaam chahiye, ya kal subah?"
+    cards:
+      - "Pick the second option, but ask a question first."
+      - "Pick the first option."
+      - "You can't decide at first. Think aloud, then pick one."
+
+  emotional:
+    slot: free_text
+    bot:
+      - "Main samajh sakti hoon. Bataiye, abhi main kya kar sakti hoon?"
+    cards:
+      - "You are frustrated: this is the third time you are calling about the same problem."
+      - "You are worried: your salary is due and your account shows a hold."
+      - "You are an elderly customer and confused about what the bank SMS meant. Explain slowly."
+
+# Long bot explanations for barge-in trials. Each sentence is synthesised separately so the
+# tool knows exactly what had been played when the participant spoke.
+bargein:
+  explanations:
+    charges:
+      - "Dekhiye, aapke account par jo charge laga hai, woh minimum balance na rakhne ka hai."
+      - "Har mahine aapke account mein kam se kam das hazaar rupaye ka average balance hona chahiye."
+      - "Agar balance isse kam rehta hai, toh teen sau rupaye aur GST ka charge lagta hai."
+      - "Yeh charge mahine ke aakhri din calculate hota hai, aur agle mahine ki pehli tareekh ko kat-ta hai."
+      - "Aap chahein toh apna account zero balance savings account mein badal sakte hain."
+    refund:
+      - "Aapki complaint humne register kar li hai, aur iska reference number aapko SMS par mil jayega."
+      - "Refund ki process mein aam taur par paanch se saat working days lagte hain."
+      - "Pehle hamari team merchant se transaction ki details confirm karegi."
+      - "Uske baad paisa usi account mein wapas aayega jisse payment hua tha."
+      - "Agar das din mein refund nahi aata, toh aap isi number par dobara call kar sakte hain."
+    card_replacement:
+      - "Aapka purana card block ho chuka hai, ab us par koi transaction nahi ho sakta."
+      - "Naya card aapke registered address par courier se bheja jayega."
+      - "Isme saat se das din lag sakte hain, aur courier wale aapse ID dikhane ko kahenge."
+      - "Card milne ke baad aapko ATM par jaakar naya PIN banana hoga."
+      - "Tab tak aap UPI aur net banking se payment kar sakte hain."
+    kyc:
+      - "Aapka KYC update pending hai, isliye kuch services abhi limited hain."
+      - "KYC update karne ke liye aap kisi bhi branch mein jaa sakte hain."
+      - "Saath mein apna PAN card aur address proof ki original copy le jaana zaroori hai."
+      - "Branch mein form bharne ke baad do din mein aapka KYC update ho jayega."
+      - "Aap chahein toh yeh kaam mobile app par video KYC se bhi kar sakte hain."
+  actions:
+    backchannel: "While the bot is talking, say 'haan haan' or 'achha' once, like you're listening. Then let it finish."
+    interrupt: "Interrupt the bot after a few seconds: 'ruko ruko, main woh nahi pooch raha' (or your own words)."
+    interrupt_polite: "Interrupt politely after a few seconds: 'ek minute, suniye...' (or your own words)."
+    silent: "Just listen. Don't say anything."
+    noise: "Cough once while the bot is talking (or tap the table near the mic). Don't speak."
+
+consent:
+  statement: "Yeh recording Baari project ke liye hai, jo voice bots ko behtar banane ke liye hai. Aapki awaaz sirf is project ki research ke liye use hogi, public nahi ki jayegi, aur aap kabhi bhi delete karwa sakte hain. Kya aap agree karte hain?"
+  instruction: "Please answer aloud: 'haan, main agree karta hoon' / 'haan, main agree karti hoon'."

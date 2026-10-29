@@ -11,9 +11,8 @@ import sys
 from baari.config import load_config
 
 PLANNED = {
-    "collect": "M2", "label": "M3", "audit-labels": "M3", "transcribe-cache": "M3",
+    "label": "M3", "audit-labels": "M3", "transcribe-cache": "M3",
     "train": "M5", "eval": "M4", "report": "M8", "serve": "M7", "replay": "M7",
-    "delete-speaker": "M2",
 }
 
 
@@ -50,6 +49,41 @@ def _cmd_listen(args: argparse.Namespace) -> int:
 
     listen(load_config(args.config), wav=args.wav, seconds=args.seconds, phone=args.phone,
            snr_db=args.snr, device=args.device)
+    return 0
+
+
+def _cmd_collect(args: argparse.Namespace) -> int:
+    from baari.collect.session import collect, prepare_tts
+
+    cfg = load_config(args.config)
+    if args.prepare_only:
+        prepare_tts(cfg, confirmed=args.yes)
+        return 0
+    if not args.speaker:
+        print("--speaker is required (e.g. --speaker S01)")
+        return 2
+    collect(cfg, speaker=args.speaker, kind=args.kind, condition=args.condition, n=args.n,
+            seconds=args.seconds, device=args.device, confirmed=args.yes)
+    return 0
+
+
+def _cmd_check_session(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from baari.collect.check import check_session
+
+    return 1 if check_session(Path(args.session)) else 0
+
+
+def _cmd_delete_speaker(args: argparse.Namespace) -> int:
+    from baari.collect.consent import delete_speaker
+
+    typed = input(f"This permanently deletes ALL data for {args.speaker}. Type the speaker id to confirm: ")
+    if typed.strip() != args.speaker:
+        print("Not confirmed; nothing deleted.")
+        return 1
+    removed = delete_speaker(args.speaker)
+    print("\n".join(f"deleted {p}" for p in removed) or "nothing found")
     return 0
 
 
@@ -97,6 +131,26 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--snr", type=float, help="noise SNR in dB for --phone")
     s.add_argument("--device", type=int, help="input device index (see `devices`)")
     s.set_defaults(func=_cmd_listen)
+
+    s = sub.add_parser("collect", help="M2: run a recording session (docs/DATA_PROTOCOL.md)")
+    s.add_argument("--speaker", help="speaker id, e.g. S01")
+    s.add_argument("--kind", choices=["turns", "bargein", "noise"], default="turns")
+    s.add_argument("--condition", default="quiet",
+                   help="quiet | fan | tv | kitchen | street | earphone | other")
+    s.add_argument("--n", type=int, help="number of trials (default 20)")
+    s.add_argument("--seconds", type=float, default=150.0, help="noise-only duration")
+    s.add_argument("--device", type=int, help="input device index (see `devices`)")
+    s.add_argument("--prepare-only", action="store_true", help="only synthesise/cache bot prompts")
+    s.add_argument("--yes", action="store_true", help="confirm jobs with > 50 API calls")
+    s.set_defaults(func=_cmd_collect)
+
+    s = sub.add_parser("check-session", help="M2: sanity-check a recorded session")
+    s.add_argument("--session", required=True, help="path to data/raw/<speaker>/<session>")
+    s.set_defaults(func=_cmd_check_session)
+
+    s = sub.add_parser("delete-speaker", help="delete all data for a speaker")
+    s.add_argument("--speaker", required=True)
+    s.set_defaults(func=_cmd_delete_speaker)
 
     s = sub.add_parser("usage", help="summarise logged API usage (credits)")
     s.set_defaults(func=_cmd_usage)

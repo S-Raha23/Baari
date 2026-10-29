@@ -1,5 +1,23 @@
 # Progress
 
+## M2 — Data collection tool (built, 30 Oct 2026; waiting for the pilot session)
+
+**Works**
+- `python -m baari collect --speaker S01 --kind turns|bargein|noise --condition quiet|fan|tv|…`:
+  speaker metadata (no names), recorded consent with operator confirmation, prompt cards with
+  fake values (D12), bot prompts via cached Timbre, Done = ENTER (D11), redo/skip/quit.
+- Barge-in mode: 5 balanced actions × 4 long explanations (19.8–24.1 s), sentence offsets
+  logged for `heard_text` (D14). Noise-only mode for augmentation clips.
+- Output per session: `mic.wav`, `blocks.npy`, `events.jsonl`, `session.json` (D13).
+- `python -m baari check-session --session DIR`: audio health + per-trial VAD summary + problems.
+- `python -m baari delete-speaker --speaker S03` (typed confirmation).
+- `audio/playback.py`: player with chunk positions, 5 ms-ramped ducking, stop, `heard_text`.
+- TTS cache warmed: 37 prompts. Dry run on the laptop: recorder 0 overflows, 16000.13 Hz.
+- 31 tests pass.
+
+**Pending (needs the human)**
+- 5-minute pilot session, then the full recording sessions in docs/DATA_PROTOCOL.md.
+
 ## M1 — Audio + local VAD + live pause events (code done, 30 Oct 2026; live check pending)
 
 **Works**

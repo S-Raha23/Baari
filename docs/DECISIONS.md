@@ -78,3 +78,32 @@ On the laptop's default (MME) input, blocks arrive with jitter (interval p5 29 m
 median 30 ms over 3 s; no overflows). Event onsets are therefore computed as
 block index × 32 ms (exact audio time); each block's `perf_counter_ns` stamp is kept to map
 audio time onto the shared clock for cross-lane latency measurements.
+
+## D11 — Collection UI is the terminal; ENTER is the Done button (30 Oct 2026)
+
+The simplest option that keeps all audio in the backend: cards are shown in the console, keys
+are read with `msvcrt` (ENTER = Done/continue, r = redo, s = skip, q = quit). The key-press time
+is logged on the shared clock. The Done press only marks *that* the turn is over; the true turn
+end is the last local-VAD speech offset before it (SPEC §7), so reaction time on the key does
+not enter the labels. Keys pressed while the bot talks are discarded.
+
+## D12 — Fake mobile numbers start with 5 (30 Oct 2026)
+
+Indian mobile numbers start with 6–9, so a 10-digit number starting with 5 cannot belong to a
+real person. Other card values (last-4 digits, 6-digit codes, amounts, dates) are random and
+not linked to anything real.
+
+## D13 — One continuous recording per session + clock fit (30 Oct 2026)
+
+Each session is one `mic.wav`. Events (card shown, playback start/end, Done) are logged with
+`perf_counter_ns`; a least-squares fit of block delivery times vs sample counts maps any event
+to a sample (dry run: measured rate 16000.13 Hz, 0 overflows). Playback timestamps are when
+samples were handed to the device; the device output latency (≈ 96 ms on the default MME
+device) is stored per prompt so the labeller can shift to acoustic time.
+
+## D14 — Bot prompts are synthesised sentence by sentence (30 Oct 2026)
+
+Long barge-in explanations (19.8–24.1 s) are cached per sentence and joined with 150 ms gaps,
+so the tool knows exactly which sentence was playing at any moment (`chunk_starts` in
+events.jsonl) — this is what `heard_text` uses. Warm-up: `python -m baari collect --prepare-only`
+(37 Timbre calls, done 30 Oct 2026).
