@@ -56,3 +56,25 @@ speakers are recorded.
 Poorvi is the only voice documented as Hinglish. 16 kHz matches the capture pipeline, so the
 bot's audio needs no resampling. The live agent uses the WebSocket transport (first audio
 ≈ 0.8–1.0 s vs 1.2–3.6 s for REST, `reports/spikes/tts_spike.md`).
+
+## D8 — Provisional `silence_start` event at 64 ms (30 Oct 2026)
+
+SPEC §5 defines a pause as silence ≥ `PAUSE_MIN_MS` (150 ms), but §9 budgets ≤ 100 ms for
+pause-onset detection. The tracker therefore emits `silence_start` after 64 ms of silence
+(detected 64–96 ms after the onset), `silence_cancel` if speech resumes first, and the confirmed
+`pause_start` at 150 ms. All three carry the back-dated onset, so ticks are always measured from
+the true speech offset. The commit (C = 120 ms) and speculative work can start from `silence_start`.
+
+## D9 — Silero VAD v5.1.2 ONNX, downloaded on first use (30 Oct 2026)
+
+Model: `snakers4/silero-vad` v5.1.2 `silero_vad.onnx`, **MIT licence**, SHA-256
+`2623a295…bdd788f` (checked on load). Stored in `models/` (gitignored); `ensure_model()`
+downloads it on a fresh clone. Inference runs single-threaded on CPU: median 0.25 ms per 32 ms
+frame on the target laptop (`python -m baari listen --wav …` prints it).
+
+## D10 — Audio time comes from the sample count, not callback timestamps (30 Oct 2026)
+
+On the laptop's default (MME) input, blocks arrive with jitter (interval p5 29 ms, p95 40 ms,
+median 30 ms over 3 s; no overflows). Event onsets are therefore computed as
+block index × 32 ms (exact audio time); each block's `perf_counter_ns` stamp is kept to map
+audio time onto the shared clock for cross-lane latency measurements.

@@ -45,6 +45,14 @@ def _cmd_devices(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_listen(args: argparse.Namespace) -> int:
+    from baari.vad.listen import listen
+
+    listen(load_config(args.config), wav=args.wav, seconds=args.seconds, phone=args.phone,
+           snr_db=args.snr, device=args.device)
+    return 0
+
+
 def _cmd_usage(args: argparse.Namespace) -> int:
     from baari.usage import usage_summary
 
@@ -81,6 +89,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     s = sub.add_parser("devices", help="list audio devices")
     s.set_defaults(func=_cmd_devices)
+
+    s = sub.add_parser("listen", help="M1: print live speech/pause events (mic, or --wav)")
+    s.add_argument("--wav")
+    s.add_argument("--seconds", type=float, default=20.0)
+    s.add_argument("--phone", action="store_true", help="apply telephone simulation (--wav only)")
+    s.add_argument("--snr", type=float, help="noise SNR in dB for --phone")
+    s.add_argument("--device", type=int, help="input device index (see `devices`)")
+    s.set_defaults(func=_cmd_listen)
 
     s = sub.add_parser("usage", help="summarise logged API usage (credits)")
     s.set_defaults(func=_cmd_usage)
