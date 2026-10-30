@@ -18,7 +18,7 @@
 **Pending (needs the human)**
 - 5-minute pilot session, then the full recording sessions in docs/DATA_PROTOCOL.md.
 
-## M1 — Audio + local VAD + live pause events (code done, 30 Oct 2026; live check pending)
+## M1 — Audio + local VAD + live pause events (done, 31 Oct 2026)
 
 **Works**
 - `audio/capture.py`: 16 kHz mono int16, 512-sample blocks, shared-clock stamps, ring buffer,
@@ -32,9 +32,10 @@
   telephone quality.
 - 21 tests pass.
 
-**Pending (needs the human)**
-- Acceptance check: say "haan… matlab… theek hai" into `python -m baari listen` and confirm three
-  segments with two pauses. Bundled with the M2 pilot session to save a round-trip.
+- Live acceptance check (31 Oct 2026, owner speaking into the laptop mic, `listen --seconds 20`):
+  "haan… matlab… theek hai" → 3 segments (384, 640, 608 ms), each followed by a pause; speech
+  start detected +64 ms, `silence_start` +64 ms, `pause_start` +160 ms after onset. VAD compute
+  median 0.53 ms, p99 0.91 ms per 32 ms frame live.
 
 ## M0 — Setup and API spike (done, 30 Oct 2026)
 
