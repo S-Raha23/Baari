@@ -1,6 +1,6 @@
 # Progress
 
-## M2 — Data collection tool (built, 30 Oct 2026; waiting for the pilot session)
+## M2 — Data collection tool (done, 31 Oct 2026)
 
 **Works**
 - `python -m baari collect --speaker S01 --kind turns|bargein|noise --condition quiet|fan|tv|…`:
@@ -15,8 +15,22 @@
 - TTS cache warmed: 37 prompts. Dry run on the laptop: recorder 0 overflows, 16000.13 Hz.
 - 31 tests pass.
 
+- Pilot (S01, quiet room, headphones), checked with `check-session`:
+  - consent: 20.3 s, 0 overflows, operator-confirmed.
+  - turns (10 trials): 254 s, 0 overflows, peak 9,246, 16000.17 Hz; speech in all 10 answer
+    windows (38 segments, 63.9 s speech, 26 within-answer pauses); Done always after the last
+    speech (0.18–1.7 s later). Mic level during bot playback −58 to −94 dBFS (no leakage).
+  - barge-in (5 trials): 191 s, 0 overflows; silent trial 0 segments over 24 s of bot speech;
+    interrupt 1 segment (1.6 s); backchannel 4 short segments (participant repeated "haan");
+    **cough detected as a 768 ms speech segment by Silero** → local VAD alone cannot reject
+    noise; barge-in classification needs the transcript lane (SPEC §6.7).
+
 **Pending (needs the human)**
-- 5-minute pilot session, then the full recording sessions in docs/DATA_PROTOCOL.md.
+- Full recording sessions in docs/DATA_PROTOCOL.md (≥ 6 speakers).
+
+**Notes for M3**
+- Barge-in trials can contain several speech onsets; label the first onset after bot start as
+  the trial event and keep the rest as same-label extras.
 
 ## M1 — Audio + local VAD + live pause events (done, 31 Oct 2026)
 
